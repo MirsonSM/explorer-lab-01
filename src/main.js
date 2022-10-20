@@ -48,12 +48,81 @@ const expeirationDatePattern = {
   } 
 }
 
+const expirationDateMasked = IMask(expirationDate, expeirationDatePattern)
 
+const cardNumber = document.querySelector('#card-number')
+const cardNumberPattern = {
+  mask: [
+    {
+      mask: "0000 0000 0000 0000",
+      regex: /^4\d{0,15}/, // Expressão regular - Regra para cartão do visa Pesquisar mais a respeito
+      cardtype: "visa",
+    },
+    {
+      mask: "0000 0000 0000 0000",
+      regex: /(^5[1-5]\d{0,2}|^22[2-9]\d|^2[3-7]\d{0,2})\d{0,12}/, // Expresão regular - Regra para Cartão Master
+      cardtype: "mastercard",
+    },
+    {
+      mask: "0000 0000 0000 0000",
+      cardtype: "default",
+    },
+  ],
+  dispatch: function (appended, dynamicMasked) {
+    const number = (dynamicMasked.value + appended).replace(/\D/g, "")
+    const foundMask = dynamicMasked.compiledMasks.find(function(item) {
+      return number.match(item.regex) // find = encontre
+    })
 
-const expirantioDateMasked = IMask(expirationDate, expeirationDatePattern)
+    return foundMask
+  },
+}
 
+const cardNumberMasked = IMask(cardNumber, cardNumberPattern)
 
+const addButton = document.querySelector('#add-card')
 
+addButton.addEventListener('click', () => {
+  alert('Cartão adicionada!')
+})
 
+document.querySelector('form').addEventListener('submit', (event) => {
+  event.preventDefault()
+} ) // Desativar o reload do submit, caso não seja feito isso ao clicar o form irá fazer o "reload"
 
+const cardHolder = document.querySelector('#card-holder')
+
+cardHolder.addEventListener('input' , () => { //input é o evento de escrever.
+  const ccHolder = document.querySelector('.cc-holder .value')
+  ccHolder.innerText = cardHolder.value.length === 0 ? "FULANO DA SILVA" : cardHolder.value
+})
+
+securityCodeMasked.on('accept' , () => {
+  updateSecurityCode(securityCodeMasked.value)
+} )
+
+function updateSecurityCode (code) {
+  const ccSecurity = document.querySelector('.cc-security .value')
+  ccSecurity.innerText = code.length === 0 ? '123' : code
+}
+
+cardNumberMasked.on("accept", () => {
+  const cardType = cardNumberMasked.masked.currentMask.cardtype // recebe a informação da mascara podendo ser mastercard, visa ou default
+  setCardType(cardType) 
+  updateCardNumber(cardNumberMasked.value)
+})
+
+function updateCardNumber(number) {
+  const ccNumber = document.querySelector(".cc-number")
+  ccNumber.innerText = number.length === 0 ? "1234 5678 9012 3456" : cardNumberMasked.value
+}
+
+expirationDateMasked.on('accept', () => {
+  updateExpirationDate(expirationDateMasked.value) 
+})
+
+function updateExpirationDate(date) {
+  const ccExpiration = document.querySelector('.cc-extra .value')
+  ccExpiration.innerText = date.length === 0 ? "02/32" : date
+}
 
